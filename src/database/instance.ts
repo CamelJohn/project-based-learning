@@ -3,7 +3,7 @@ import { getConfig } from "../utils/dotenv";
 
 const { database } = getConfig()
 
-export const db = new Sequelize({
+export const $db = new Sequelize({
   database: database.name,
   password: database.password,
   username: database.username,
