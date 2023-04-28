@@ -23,6 +23,7 @@
     "@types/morgan": "^1.9.4",
     "@types/node": "^18.16.2",
     "@types/sequelize": "^4.28.14",
+    "dotenv-expand": "^10.0.0",
     "nodemon": "^2.0.22",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",

@@ -1,8 +1,10 @@
 import dotenv from "dotenv";
+import dotenvExpand from 'dotenv-expand';
 import { DotEnv } from "./dotnev.types";
 
 export function getConfig(): DotEnv.Contract {
-  const config = dotenv.config();
+  const raw = dotenv.config();
+  const config = dotenvExpand.expand(raw);
 
   if (config.error) {
     throw config.error;
@@ -14,17 +16,6 @@ export function getConfig(): DotEnv.Contract {
 
   const stringConfig = JSON.stringify(config.parsed);
   const parsed = JSON.parse(stringConfig) as DotEnv.Domain;
-
-  const configMapper: DotEnv.Contract = {
-    server: {
-      port: parseInt(parsed.SERVER_PORT),
-      prefix: parsed.SERVER_PREFIX,
-      message: parsed.SERVER_LISTEN_MESSAGE,
-    },
-    spa: {
-      url: parsed.SPA_URL,
-    },
-  };
 
   return {
     server: {
