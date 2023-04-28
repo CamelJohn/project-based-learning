@@ -40,10 +40,10 @@ export namespace Middleware {
   }
 
   export async function auth(req: Request, res: Response, next: NextFunction) {
-    const isAuth = /\/auth/.test(req.path) && req.method === "POST";
+    const isAuth = /\/login|register/.test(req.path) && req.method === "POST";
 
     if (isAuth) {
-      next();
+      return next();
     }
 
     const hasAuthorization = Joi.object()

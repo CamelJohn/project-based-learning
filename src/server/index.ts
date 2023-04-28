@@ -14,6 +14,8 @@ export async function Server({ test = false }: ServerArgs) {
 
     const { server } = getConfig();
 
+    webServer.use(Middleware.base);
+
     webServer.get("/health", Middleware.health);
 
     webServer.use(server.prefix, Middleware.auth, webRouter);
@@ -23,10 +25,15 @@ export async function Server({ test = false }: ServerArgs) {
     webServer.use(Middleware.error);
 
     if (test) {
-      return webServer.listen(server.test_port, () => console.log(server.test_message))
+      return webServer.listen(server.test_port, (): void =>
+        console.log(server.test_message)
+      );
     }
 
-    return webServer.listen(server.port, () => console.log(server.message));
+    return webServer.listen(server.port, (): void =>
+      console.log(server.message)
+    );
+    
   } catch (error) {
     console.error({ error, context: "server" });
     process.exit(1);
