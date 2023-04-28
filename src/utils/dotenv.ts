@@ -28,5 +28,11 @@ export function getConfig(): DotEnv.Contract {
     spa: {
       url: parsed.SPA_URL,
     },
+    database: {
+      port: parseInt(parsed.DATABASE_PORT, 10),
+      password: parsed.DATABASE_PASSWORD,
+      name: parsed.DATABASE_NAME,
+      username: parsed.DATABASE_USERNAME
+    }
   };
 }
