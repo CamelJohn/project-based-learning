@@ -4,6 +4,7 @@ export namespace DotEnv {
     SERVER_TEST_PORT: string;
     SERVER_PREFIX: string;
     SERVER_LISTEN_MESSAGE: string;
+    SERVER_TEST_LISTEN_MESSAGE: string;
     SPA_PORT: string;
     SPA_URL: string;
   }
@@ -13,6 +14,7 @@ export namespace DotEnv {
     test_port: number;
     prefix: string;
     message: string;
+    test_message: string;
   }
 
   export interface Spa {

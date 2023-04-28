@@ -23,6 +23,7 @@ export function getConfig(): DotEnv.Contract {
       test_port: parseInt(parsed.SERVER_TEST_PORT),
       prefix: parsed.SERVER_PREFIX,
       message: parsed.SERVER_LISTEN_MESSAGE,
+      test_message: parsed.SERVER_TEST_LISTEN_MESSAGE
     },
     spa: {
       url: parsed.SPA_URL,

@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response, json, urlencoded } from "express";
-import { NotFound, isHttpError } from "http-errors";
+import { NotFound, Unauthorized, isHttpError } from "http-errors";
 import cookieParser from "cookie-parser";
-import morgan from "morgan"
+import morgan from "morgan";
 import cors from "cors";
+import Joi from "joi";
 import { getConfig } from "../utils/dotenv";
 
 const { spa } = getConfig();
@@ -38,10 +39,33 @@ export namespace Middleware {
     res.status(500).json("something went wrong");
   }
 
+  export async function auth(req: Request, res: Response, next: NextFunction) {
+    const isAuth = /\/auth/.test(req.path) && req.method === "POST";
+
+    if (isAuth) {
+      next();
+    }
+
+    const hasAuthorization = Joi.object()
+      .keys({
+        authorization: Joi.string()
+          .regex(/Bearer \w{0,}/)
+          .required(),
+      })
+      .options({ allowUnknown: true })
+      .validate(req.headers);
+
+    if (hasAuthorization.error) {
+      return next(new Unauthorized(hasAuthorization.error.message));
+    }
+
+    next();
+  }
+
   export const base = [
     json(),
     urlencoded({ extended: true }),
-    morgan('dev'),
+    morgan("dev"),
     cors({
       origin: spa.url,
       credentials: true,

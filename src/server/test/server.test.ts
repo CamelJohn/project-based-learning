@@ -3,6 +3,9 @@ import { Server } from "../index";
 
 describe("Server Base Middleware", () => {
   let webServer: Awaited<ReturnType<typeof Server>>;
+  const headers = {
+    Authorization: 'Bearer <token_goes_here'
+  }
 
   beforeAll(async () => {
     webServer = await Server({ test: true });
@@ -19,7 +22,7 @@ describe("Server Base Middleware", () => {
   });
 
   describe("Catch All Middleware", () => {
-    it("should return status 404 & Not-Found error message", async () => {
+    it("should return status 404 & Not-Found Error message", async () => {
       const response = await supertest(webServer).get("/lies");
       expect(response.body.message).toEqual(
         "the route you are looking for does not exist."
