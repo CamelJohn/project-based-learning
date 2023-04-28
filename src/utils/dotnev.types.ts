@@ -1,6 +1,7 @@
 export namespace DotEnv {
   export interface Domain {
     SERVER_PORT: string;
+    SERVER_TEST_PORT: string;
     SERVER_PREFIX: string;
     SERVER_LISTEN_MESSAGE: string;
     SPA_PORT: string;
@@ -9,6 +10,7 @@ export namespace DotEnv {
 
   export interface Server {
     port: number;
+    test_port: number;
     prefix: string;
     message: string;
   }

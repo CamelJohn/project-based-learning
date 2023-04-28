@@ -2,7 +2,11 @@ import express, { Application } from "express";
 import { getConfig } from "../utils/dotenv";
 import { Middleware } from "./middleware";
 
-export async function Server() {
+interface ServerArgs {
+  test?: boolean;
+}
+
+export async function Server({ test = false }: ServerArgs) {
   try {
     const webServer: Application = express();
 
@@ -16,7 +20,7 @@ export async function Server() {
 
     webServer.use(Middleware.error);
 
-    return webServer.listen(server.port, () => console.log(server.message));
+    return webServer.listen(test ? server.test_port :server.port, () => console.log(test ? '' : server.message));
   } catch (error) {
     console.error({ error, context: "server" });
     process.exit(1);

@@ -20,6 +20,7 @@ export function getConfig(): DotEnv.Contract {
   return {
     server: {
       port: parseInt(parsed.SERVER_PORT),
+      test_port: parseInt(parsed.SERVER_TEST_PORT),
       prefix: parsed.SERVER_PREFIX,
       message: parsed.SERVER_LISTEN_MESSAGE,
     },
