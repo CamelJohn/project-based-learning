@@ -77,46 +77,49 @@ export async function login(req: Request, res: Response, next: NextFunction) {
   res.status(200).json(authDomainToContract(user));
 }
 
-export function validateRegisterBody(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const isValid = registerBodyValidationSchema.validate(req.body);
-
-  if (isValid.error) {
-    return next(new BadRequest(isValid.error.message));
+export namespace Register {
+  export function validateRegisterBody(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const isValid = registerBodyValidationSchema.validate(req.body);
+  
+    if (isValid.error) {
+      return next(new BadRequest(isValid.error.message));
+    }
+  
+    next();
   }
-
-  next();
-}
-
-export async function canRegister(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const userExists = await User.findOne({
-    where: {
-      email: req.body.user.email,
-    },
-  });
-
-  if (userExists) {
-    return next(new Conflict("invalid credentials"));
+  
+  export async function canRegister(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const userExists = await User.findOne({
+      where: {
+        email: req.body.user.email,
+      },
+    });
+  
+    if (userExists) {
+      return next(new Conflict("invalid credentials"));
+    }
+  
+    next();
   }
-
-  next();
+  
+  export async function register(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const user = await createUser(req);
+  
+    res.cookie("auth-token", user.token, getAuthTokenConfig());
+  
+    res.status(201).json(authDomainToContract(user));
+  }
 }
 
-export async function register(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const user = await createUser(req);
-
-  res.cookie("auth-token", user.token, getAuthTokenConfig());
-
-  res.status(201).json(authDomainToContract(user));
-}
