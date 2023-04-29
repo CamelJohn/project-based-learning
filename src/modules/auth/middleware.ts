@@ -6,12 +6,12 @@ import {
   registerBodyValidationSchema,
 } from "./validation.schemas";
 import {
-  authDomainToContract,
   createUser,
   getAuthTokenConfig,
   getAuthUser,
 } from "./helpers";
 import { User } from "../../database/models";
+import { userDomainToContract } from "../common/helpers";
 
 export namespace Login {
   export function validateLoginBody(
@@ -72,7 +72,7 @@ export namespace Login {
 
     res.cookie("auth-token", user.token, getAuthTokenConfig());
 
-    res.status(200).json(authDomainToContract(user));
+    res.status(200).json(userDomainToContract(user));
   }
 }
 
@@ -118,6 +118,6 @@ export namespace Register {
 
     res.cookie("auth-token", user.token, getAuthTokenConfig());
 
-    res.status(201).json(authDomainToContract(user));
+    res.status(201).json(userDomainToContract(user));
   }
 }

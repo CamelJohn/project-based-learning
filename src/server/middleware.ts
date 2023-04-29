@@ -36,6 +36,8 @@ export namespace Middleware {
       });
     }
 
+    console.log(error);
+
     res.status(500).json("something went wrong");
   }
 

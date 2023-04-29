@@ -33,23 +33,27 @@ export const User = $db.define<UserModel>(
   {
     hooks: {
       beforeValidate: async (user, options) => {
-        const salt = await g3nS4lt(12);
-        const password = await h4shP4ssw0rd(
-          user.getDataValue("password"),
-          salt
-        );
-        user.setDataValue("password", password);
+        if (user.getDataValue("password")) {
+          const salt = await g3nS4lt(12);
+          const password = await h4shP4ssw0rd(
+            user.getDataValue("password"),
+            salt
+          );
+          user.setDataValue("password", password);
+        }
 
-        const authToken = JwT.sign(
-          { email: user.getDataValue("email") },
-          token.secret,
-          {
-            encoding: "utf8",
-            expiresIn: 1000 * 3 * 24 * 60 * 60,
-          }
-        );
+        if (user.getDataValue("token")) {
+          const authToken = JwT.sign(
+            { email: user.getDataValue("email") },
+            token.secret,
+            {
+              encoding: "utf8",
+              expiresIn: 1000 * 3 * 24 * 60 * 60,
+            }
+          );
 
-        user.setDataValue('token', authToken);
+          user.setDataValue("token", authToken);
+        }
       },
     },
   }
@@ -80,7 +84,7 @@ export const Profile = $db.define<ProfileModel>("profile", {
   userId: {
     allowNull: false,
     type: DataTypes.UUID,
-  }
+  },
 });
 
 export const FollowingProfile = $db.define(
