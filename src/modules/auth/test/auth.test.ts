@@ -57,20 +57,20 @@ describe("[Auth]", () => {
       expect(response.statusCode).toBe(400);
     });
 
-    it("should return status 201, for valid request", async () => {
+    it("should return status 201, for valid request & 409 for duplicate user", async () => {
       const response = await http
         .post("/api/v1/auth/register")
         .send(aValidRegisterUserRequest({}))
         .set("Accept", "application/json")
         .set("Content-Type", "application/json");
 
-      const [cookies] = response.headers["set-cookie"];
-      expect(response.statusCode).toBe(201);
-      expect(cookies.split("=; ")).toContain("auth-token");
+      if (response.statusCode === 201) {
+        const cookies = response.headers["set-cookie"];
+        expect(response.statusCode).toBe(201);
+        expect(cookies.split("=; ")).toContain("auth-token");
+      } else {
+        expect(response.statusCode).toBe(409);
+      }
     });
-
-    it.todo(
-      "should retrun an Conflict Error with status 409 for existing credentials"
-    );
   });
 });

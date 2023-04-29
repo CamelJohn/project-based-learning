@@ -1,16 +1,21 @@
 import { NextFunction, Request, Response } from "express";
-import { BadRequest, Unauthorized } from "http-errors";
+import { BadRequest, Unauthorized, Conflict } from "http-errors";
 import {
   compare as C0mp4r3,
   hash as h4shP4ssw0rd,
   genSalt as g3nS4lt,
 } from "bcrypt";
-import { loginBodyValidationSchema, registerBodyValidationSchema } from "./validation.schemas";
+import {
+  loginBodyValidationSchema,
+  registerBodyValidationSchema,
+} from "./validation.schemas";
 import {
   authDomainToContract,
+  createUser,
   getAuthTokenConfig,
   getAuthUser,
 } from "./helpers";
+import { User } from "../../database/models";
 
 export function validateLoginBody(
   req: Request,
@@ -55,7 +60,7 @@ export async function isAuthenticated(
   );
 
   // TODO:uncomment - add db query
-  
+
   // if (!isAuthenticated) {
   //   return next(new Unauthorized("invalid credentials."));
   // }
@@ -91,19 +96,25 @@ export async function canRegister(
   res: Response,
   next: NextFunction
 ) {
-  // TODO: add db query
-  const userExists = undefined
+  const userExists = await User.findOne({
+    where: {
+      email: req.body.user.email,
+    },
+  });
 
   if (userExists) {
-    return next(new Unauthorized("invalid credentials"));
+    return next(new Conflict("invalid credentials"));
   }
 
   next();
 }
 
-export async function register(req: Request, res: Response, next: NextFunction) {
-  // TODO: add db query
-  const user = await getAuthUser(req);
+export async function register(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const user = await createUser(req);
 
   res.cookie("auth-token", user.token, getAuthTokenConfig());
 

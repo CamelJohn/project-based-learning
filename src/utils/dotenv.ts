@@ -33,6 +33,9 @@ export function getConfig(): DotEnv.Contract {
       password: parsed.DATABASE_PASSWORD,
       name: parsed.DATABASE_NAME,
       username: parsed.DATABASE_USERNAME
+    },
+    token: {
+      secret: parsed.AUTH_TOKEN_SECRET
     }
   };
 }

@@ -10,6 +10,8 @@ export namespace DotEnv {
     DATABASE_PASSWORD: string;
     DATABASE_USERNAME: string;
     DATABASE_PORT: string;
+
+    AUTH_TOKEN_SECRET: string;
     
     SPA_PORT: string;
     SPA_URL: string;
@@ -34,9 +36,14 @@ export namespace DotEnv {
     url: string;
   }
 
+  export interface Token {
+    secret: string;
+  }
+
   export interface Contract {
     server: Server;
     spa: Spa;
     database: Databse;
+    token: Token;
   }
 }

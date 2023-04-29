@@ -1,5 +1,7 @@
 import { Request } from "express";
-import { Contract, UserDomain } from "./types";
+import { Profile, User } from "../../database/models";
+import { UserModelAttributes } from "../../database/models/types";
+import { Contract } from "./types";
 
 export async function getAuthUser(req: Request) {
   return {
@@ -14,7 +16,7 @@ export async function getAuthUser(req: Request) {
       username: "",
       bio: null,
       image: null,
-      userId: ""
+      userId: "",
     },
   };
 }
@@ -26,7 +28,7 @@ export function getAuthTokenConfig() {
   };
 }
 
-export function authDomainToContract(user: UserDomain): Contract {
+export function authDomainToContract(user: UserModelAttributes): Contract {
   return {
     user: {
       email: user.email,
@@ -36,4 +38,18 @@ export function authDomainToContract(user: UserDomain): Contract {
       image: user?.profile?.image ?? null,
     },
   };
+}
+
+export async function createUser(req: Request) {
+  const domainUser = await User.create({
+    email: req.body.user.email,
+    password: req.body.user.password,
+    profile: {
+      username: req.body.user.username,
+    }
+  }, {
+    include: [Profile]
+  });
+
+  return domainUser.toJSON();
 }

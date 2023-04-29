@@ -1,8 +1,10 @@
 import { $db } from "./instance";
+import { $definitions } from "./models";
 
 async function $connect() {
   await $db.authenticate();
-  await $db.sync();
+  $definitions();
+  await $db.sync({ alter: true });
 }
 
 async function $close() {
