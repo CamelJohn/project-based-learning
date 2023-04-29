@@ -1,18 +1,12 @@
 import express from "express";
-import {
-  canLogin,
-  isAuthenticated,
-  login,
-  validateLoginBody,
-  Register,
-} from "./middleware";
+import { Login, Register } from "./middleware";
 
 export const authRouter = express.Router();
 
 authRouter.post(
   "/login",
-  [validateLoginBody, canLogin, isAuthenticated],
-  login
+  [Login.validateLoginBody, Login.canLogin, Login.isAuthenticated],
+  Login.login
 );
 
 authRouter.post(

@@ -4,21 +4,12 @@ import { UserModelAttributes } from "../../database/models/types";
 import { Contract } from "./types";
 
 export async function getAuthUser(req: Request) {
-  return {
-    id: "",
-    email: "",
-    token: "",
-    password: "jonathan",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    deletedAt: null,
-    profile: {
-      username: "",
-      bio: null,
-      image: null,
-      userId: "",
-    },
-  };
+  const domainUser = await User.findOne({
+    where: { email: req.body.user.email },
+    include: [Profile]
+  });
+
+  return domainUser?.toJSON();
 }
 
 export function getAuthTokenConfig() {

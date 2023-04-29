@@ -15,7 +15,9 @@ describe("[Auth]", () => {
     http = supertest(webServer);
   });
 
-  afterEach(() => webServer.close());
+  afterEach(() => {
+    webServer.close();
+  });
 
   describe("{Login}", () => {
     it("should throw a Bad Request Error with status 400, for malformed request", async () => {
@@ -36,14 +38,25 @@ describe("[Auth]", () => {
         .set("Content-Type", "application/json");
 
       const [cookies] = response.headers["set-cookie"];
+      const [tokenData] = cookies.split("=; ");
+      const [tokenName] = tokenData.split("=");
 
       expect(response.statusCode).toBe(200);
-      expect(cookies.split("=; ")).toContain("auth-token");
+      expect(tokenName).toContain("auth-token");
     });
 
-    it.todo(
-      "should retrun an Unauthorized Error with status 401 for invalid credentials"
-    );
+    it("should retrun an Unauthorized Error with status 401 for invalid credentials", async () => {
+      const response = await http
+        .post("/api/v1/auth/login")
+        .send(
+          aValidLoginUserRequest({
+            password: "smuckers",
+          })
+        )
+        .set("Accept", "application/json")
+        .set("Content-Type", "application/json");
+      expect(response.statusCode).toBe(401);
+    });
   });
 
   describe("{Regiter}", () => {

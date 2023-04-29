@@ -22,7 +22,7 @@ export function aMalformedUserRequest({
 
 export function aValidLoginUserRequest({
   email = "jonathan23986@gmail.com",
-  password = "lies_liets",
+  password = "camel23986",
 }: aUserLoginRequestArguments) {
   return {
     user: {
