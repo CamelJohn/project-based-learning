@@ -7,7 +7,6 @@ export interface ProfileModelAttributes {
   image: string | null;
   createdAt?: Date | null;
   upatedAt?: Date | null;
-  deletedAt?: Date | null;
   userId: string;
 }
 
@@ -27,7 +26,6 @@ export interface UserModelAttributes {
   token: string;
   createdAt?: Date | null;
   upatedAt?: Date | null;
-  deletedAt?: Date | null;
   profile?: ProfileModelAttributes;
 }
 

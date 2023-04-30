@@ -1,10 +1,10 @@
 import express from "express";
-import { Get, ProfileCommon } from "./middleware";
+import { Follow, Get, ProfileCommon } from "./middleware";
 
 export const profileRouter = express.Router();
 
 profileRouter.get('/:username', ProfileCommon.validateUsernameParam, Get.get);
 
-profileRouter.post('/:username/follow')
+profileRouter.post('/:username/follow', ProfileCommon.validateUsernameParam, Follow.follow);
 
-profileRouter.delete('/:username/follow')
+profileRouter.delete('/:username/follow', ProfileCommon.validateUsernameParam, Follow.unfollow);

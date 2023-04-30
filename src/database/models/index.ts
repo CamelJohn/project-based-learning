@@ -33,16 +33,16 @@ export const User = $db.define<UserModel>(
   {
     hooks: {
       beforeValidate: async (user, options) => {
-        if (user.getDataValue("password")) {
+        // if (user.getDataValue("password")) {
           const salt = await g3nS4lt(12);
           const password = await h4shP4ssw0rd(
             user.getDataValue("password"),
             salt
           );
           user.setDataValue("password", password);
-        }
+        // }
 
-        if (user.getDataValue("token")) {
+        // if (user.getDataValue("token")) {
           const authToken = JwT.sign(
             { email: user.getDataValue("email") },
             token.secret,
@@ -53,7 +53,7 @@ export const User = $db.define<UserModel>(
           );
 
           user.setDataValue("token", authToken);
-        }
+        // }
       },
     },
   }
