@@ -14,14 +14,14 @@ describe("[User]", () => {
     webServer.close();
   });
 
-  describe('{current-user}', () => {
-    // it("should throw a Bad Request Error with status 400, for malformed request", async () => {
-    //     const response = await http
-    //       .get("/api/v1/user")
-    //       .set("Accept", "application/json")
-    //       .set("Content-Type", "application/json");
-  
-    //     expect(response.statusCode).toBe(400);
-    //   });
-  })
+  describe("{current-user}", () => {
+    it("should throw a Unauthorized Error with status 401, for malformed request", async () => {
+      const response = await http
+        .get("/api/v1/user")
+        .set("Accept", "application/json")
+        .set("Content-Type", "application/json");
+
+      expect(response.statusCode).toBe(401);
+    });
+  });
 });

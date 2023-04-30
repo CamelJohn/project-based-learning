@@ -12,7 +12,7 @@ interface ServerArgs {
 export async function Server({ test = false }: ServerArgs) {
   const { $close, $connect } = database();
   try {
-    await $connect();
+    await $connect({ alter: !test });
 
     const webServer: Application = express();
 

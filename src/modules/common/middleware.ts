@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { authorizationHeaderValidationSchema } from "./validation.schema";
-import { BadRequest } from "http-errors";
+import { BadRequest, Unauthorized } from "http-errors";
 
 export namespace Common {
   export function validateAuthHeader(
@@ -9,9 +9,9 @@ export namespace Common {
     next: NextFunction
   ) {
     const isValid = authorizationHeaderValidationSchema.validate(req.headers);
-
+    
     if (isValid.error) {
-      return next(new BadRequest(isValid.error.message));
+      return next(new Unauthorized(isValid.error.message));
     }
 
     next();
