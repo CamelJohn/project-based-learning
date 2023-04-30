@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import { $db } from "../instance";
 import { hash as h4shP4ssw0rd, genSalt as g3nS4lt } from "bcrypt";
 import JwT from "jsonwebtoken";
-import { ProfileModel, UserModel } from "./types";
+import { FollowingProfileModel, ProfileModel, UserModel } from "./types";
 import { getConfig } from "../../utils/dotenv";
 
 const { token } = getConfig();
@@ -87,7 +87,7 @@ export const Profile = $db.define<ProfileModel>("profile", {
   },
 });
 
-export const FollowingProfile = $db.define(
+export const FollowingProfile = $db.define<FollowingProfileModel>(
   "followingProfile",
   {
     id: {

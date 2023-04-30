@@ -5,6 +5,7 @@ import morgan from "morgan";
 import cors from "cors";
 import Joi from "joi";
 import { getConfig } from "../utils/dotenv";
+import { JsonWebTokenError } from "jsonwebtoken";
 
 const { spa } = getConfig();
 
@@ -17,22 +18,34 @@ export namespace Middleware {
     next(new NotFound("the route you are looking for does not exist."));
   }
 
+  function formatErrorName(name: string) {
+    return name
+      .replace("Error", "")
+      .replace(/([A-Z])/g, " $1")
+      .trim();
+  }
+
   export async function error(
     error: any,
     req: Request,
     res: Response,
     next: NextFunction
   ) {
-    if (isHttpError(error)) {
-      const formattedErrorName = error.name
-        .replace("Error", "")
-        .replace(/([A-Z])/g, " $1")
-        .trim();
+    const type = formatErrorName(error.name);
 
+    if (isHttpError(error)) {
       return res.status(error.statusCode).json({
-        type: formattedErrorName,
+        type,
         message: error.message,
         code: error.statusCode,
+      });
+    }
+
+    if (error instanceof JsonWebTokenError) {
+      return res.status(401).json({
+        type,
+        message: error.message,
+        code: 401
       });
     }
 

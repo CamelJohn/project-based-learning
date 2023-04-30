@@ -2,7 +2,7 @@ import JwT from "jsonwebtoken";
 import { Request } from "express";
 import { BadRequest, NotFound } from "http-errors";
 import { getConfig } from "../../utils/dotenv";
-import { Profile, User } from "../../database/models";
+import { FollowingProfile, Profile, User } from "../../database/models";
 import { $db } from "../../database/instance";
 
 const { token } = getConfig();

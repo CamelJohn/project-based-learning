@@ -1,7 +1,7 @@
 import { Model } from "sequelize";
 
 export interface ProfileModelAttributes {
-  id?: string;
+  id: string;
   username: string;
   bio: string | null;
   image: string | null;
@@ -15,7 +15,10 @@ interface ProfileCreationAttributes {
   username: string;
 }
 
-export type ProfileModel = Model<ProfileModelAttributes, ProfileCreationAttributes>;
+export type ProfileModel = Model<
+  ProfileModelAttributes,
+  ProfileCreationAttributes
+>;
 
 export interface UserModelAttributes {
   id: string;
@@ -35,3 +38,19 @@ interface UserCreationAttributes {
 }
 
 export type UserModel = Model<UserModelAttributes, UserCreationAttributes>;
+
+export interface FollowingModelAttributes {
+  id: string;
+  userId: string;
+  profileUserId: string;
+}
+
+interface FollowingCreationAttributes {
+  userId: string;
+  profileUserId: string;
+}
+
+export type FollowingProfileModel = Model<
+  FollowingModelAttributes,
+  FollowingCreationAttributes
+>;
