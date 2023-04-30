@@ -30,3 +30,26 @@ export function articleDomainToContract(
     },
   };
 }
+
+export function articlesDomainToContract(
+  article: ArticleModelAttributes,
+  profile: ProfileModelAttributes
+) {
+  return {
+    slug: article.slug,
+    title: article.title,
+    description: article.description,
+    body: article.body,
+    tagList: [],
+    createdAt: article.createdAt,
+    updatedAt: article.updatedAt,
+    favorited: article.favorited,
+    favoritesCount: article.favoritesCount,
+    author: {
+      username: profile.username,
+      bio: profile.bio,
+      image: profile.image,
+      following: false,
+    },
+  };
+}

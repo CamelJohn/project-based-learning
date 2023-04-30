@@ -3,7 +3,7 @@ import { Article, ArticleTag, Profile, User } from "../../database/models";
 import { createArticleRequestValidationSchema } from "./validation.schema";
 import { UnprocessableEntity, NotFound } from "http-errors";
 import { getUserFromToken } from "../user/helpers";
-import { articleDomainToContract } from "./helpers";
+import { articleDomainToContract, articlesDomainToContract } from "./helpers";
 
 export namespace List {
   export async function listArticles(
@@ -12,10 +12,29 @@ export namespace List {
     next: NextFunction
   ) {
     try {
-      const articles = await Article.findAndCountAll({});
+      const countedArticles = await Article.findAndCountAll({
+        include: [
+          {
+            model: User,
+            include: [{ model: Profile }],
+          },
+        ],
+        nest: true,
+      });
 
-      res.status(200).json(articles);
+      const articles = countedArticles.rows.map((article) =>
+        articlesDomainToContract(
+          article.toJSON(),
+          article.toJSON().user?.profile!
+        )
+      );
+
+      res.status(200).json({
+        articles,
+        total: countedArticles.count,
+      });
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -60,7 +79,7 @@ export namespace Create {
             ],
           },
         ],
-        returning: true
+        returning: true,
       }
     );
 
@@ -70,12 +89,12 @@ export namespace Create {
   export async function getProfile(userId: string) {
     const profile = await Profile.findOne({
       where: {
-        userId
-      }
-    })
+        userId,
+      },
+    });
 
     if (!profile) {
-      throw new NotFound('profile not found');
+      throw new NotFound("profile not found");
     }
 
     return profile.toJSON();
