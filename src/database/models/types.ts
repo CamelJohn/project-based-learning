@@ -62,12 +62,16 @@ export interface ArticleModelAttributes {
   favorited: boolean;
   favoritesCount: number;
   authorId: string;
+  user?: UserModelAttributes;
+  createdAt?: Date | null;
+  updatedAt?: Date | null;
 }
 
 interface ArticleCreationAttributes {
   title: string;
   description: string;
   body: string;
+  authorId: string;
   tagList?: string[];
 }
 

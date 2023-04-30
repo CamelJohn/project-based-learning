@@ -165,6 +165,14 @@ export const Article = $db.define<ArticleModel>("article", {
       key: "id",
     },
   },
+}, {
+  hooks: {
+    beforeValidate: async (article, options) => {
+      const title = article.getDataValue('title');
+      const slug = title.replace(/\s/gi, "-").toLowerCase();
+      article.setDataValue('slug',slug);
+    }
+  }
 });
 
 export const FavoriteArticle = $db.define("favoriteArticle", {
@@ -291,6 +299,12 @@ export function $definitions() {
     onUpdate: "CASCADE",
     foreignKey: "authorId",
   });
+
+  Article.belongsTo(User, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    foreignKey: "authorId",
+  })
 
   // User 1:n => Article
   User.hasMany(FavoriteArticle, {

@@ -4,7 +4,7 @@ import { $definitions } from "./models";
 async function $connect({ alter = false}) {
   await $db.authenticate();
   $definitions();
-  await $db.sync({ alter });
+  await $db.sync({ alter: true });
 }
 
 async function $close() {

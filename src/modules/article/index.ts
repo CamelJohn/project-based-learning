@@ -10,7 +10,7 @@ articleRouter.get("/feed");
 
 articleRouter.get("/:slug");
 
-articleRouter.post("", Create.validateBody);
+articleRouter.post("", Create.validateBody, Create.createArticle);
 
 articleRouter.put("/:slug");
 
