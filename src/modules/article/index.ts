@@ -1,14 +1,16 @@
 import express from "express";
+import { Create, List } from "./middleware";
 
 export const articleRouter = express.Router();
 
-articleRouter.get("");
+// TODO: to be continuted
+articleRouter.get("", List.listArticles);
 
 articleRouter.get("/feed");
 
 articleRouter.get("/:slug");
 
-articleRouter.post("");
+articleRouter.post("", Create.validateBody);
 
 articleRouter.put("/:slug");
 

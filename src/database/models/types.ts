@@ -52,3 +52,23 @@ export type FollowingProfileModel = Model<
   FollowingModelAttributes,
   FollowingCreationAttributes
 >;
+
+export interface ArticleModelAttributes {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  body: string;
+  favorited: boolean;
+  favoritesCount: number;
+  authorId: string;
+}
+
+interface ArticleCreationAttributes {
+  title: string;
+  description: string;
+  body: string;
+  tagList?: string[];
+}
+
+export type ArticleModel = Model<ArticleModelAttributes, ArticleCreationAttributes>;
