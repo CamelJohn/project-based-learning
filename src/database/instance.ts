@@ -14,7 +14,8 @@ export const $db = new Sequelize({
     // paranoid: true,
     freezeTableName: true,
   },
-  logging: console.log,
+  // logging: console.log,
+  logging: false
   // sync: {
   //   force: false,
   //   alter: false,

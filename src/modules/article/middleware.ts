@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { Article, ArticleTag, Profile, Tag, User } from "../../database/models";
 import { createArticleRequestValidationSchema } from "./validation.schema";
-import { UnprocessableEntity, NotFound } from "http-errors";
+import { UnprocessableEntity, NotFound, Conflict } from "http-errors";
 import { getUserFromToken } from "../user/helpers";
 import { articleDomainToContract, articlesDomainToContract } from "./helpers";
 import { ArticleModel } from "../../database/models/types";
+import { UniqueConstraintError, ValidationErrorItem } from "sequelize";
 
 export namespace List {
   export function mapArticles(countedArticles: {
@@ -68,7 +69,6 @@ export namespace Create {
         title: req.body.article.title,
         description: req.body.article.description,
         body: req.body.article.body,
-        authorId: user.id,
       },
       {
         include: [
@@ -90,13 +90,15 @@ export namespace Create {
     );
 
     if (req.body.article.tagList) {
-      const uniqueTags: string[] = [...new Set(req.body.article.tagList as string[])];
-      const tags = uniqueTags.map(t => ({ name: t }));
+      const uniqueTags: string[] = [
+        ...new Set(req.body.article.tagList as string[]),
+      ];
+      const tags = uniqueTags.map((t) => ({ name: t }));
       const tagsDomain = await Tag.bulkCreate(tags);
-      const domainTags = tagsDomain.map(t => ({
+      const domainTags = tagsDomain.map((t) => ({
         articleId: article.toJSON().id,
-        tagId: t.toJSON().id
-      }))
+        tagId: t.toJSON().id,
+      }));
 
       await ArticleTag.bulkCreate(domainTags);
     }
@@ -125,22 +127,34 @@ export namespace Create {
   ) {
     try {
       const article = await create(req);
-      const profile = await getProfile(article.authorId);
-      const articleTags = await ArticleTag.findAll({ where: {
-        articleId: article.id,
-      }});
+      const profile = await getProfile(article.user?.id ?? "");
+      const articleTags = await ArticleTag.findAll({
+        where: {
+          articleId: article.id,
+        },
+      });
 
-      const tagIds = articleTags.map(at => at.toJSON().tagId);
+      const tagIds = articleTags.map((at) => at.toJSON().tagId);
 
-      const tags = await Tag.findAll({ where: {
-        id: tagIds
-      }});
+      const tags = await Tag.findAll({
+        where: {
+          id: tagIds,
+        },
+      });
 
-      const tagList = tags.map(t => t.toJSON().name);
+      const tagList = tags.map((t) => t.toJSON().name);
 
       res.status(201).json(articleDomainToContract(article, profile, tagList));
     } catch (error) {
-      console.log({ error });
+      if (error instanceof UniqueConstraintError) {
+        return next(
+          new Conflict(
+            error.errors
+              .map((e) => e.message.replace(/name/gi, "tag"))
+              .join(" ")
+          )
+        );
+      }
       next(error);
     }
   }
