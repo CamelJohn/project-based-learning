@@ -7,10 +7,10 @@ export interface ProfileModelAttributes {
   image: string | null;
   createdAt?: Date | null;
   upatedAt?: Date | null;
-  userId: string;
+  userId?: string;
 }
 
-interface ProfileCreationAttributes {
+export interface ProfileCreationAttributes {
   username: string;
 }
 
@@ -29,7 +29,7 @@ export interface UserModelAttributes {
   profile?: ProfileModelAttributes;
 }
 
-interface UserCreationAttributes {
+export interface UserCreationAttributes {
   email: string;
   password: string;
   profile: ProfileCreationAttributes;
@@ -39,13 +39,17 @@ export type UserModel = Model<UserModelAttributes, UserCreationAttributes>;
 
 export interface FollowingModelAttributes {
   id: string;
-  userId: string;
-  profileUserId: string;
+  // userId: string;
+  // profileUserId: string;
+  followerId?: string;
+  followedId?: string;
 }
 
-interface FollowingCreationAttributes {
-  userId: string;
-  profileUserId: string;
+export interface FollowingCreationAttributes {
+  followerId: string;
+  followedId: string;
+  // userId: string;
+  // profileUserId: string;
 }
 
 export type FollowingProfileModel = Model<
@@ -61,7 +65,7 @@ export interface ArticleModelAttributes {
   body: string;
   favorited: boolean;
   favoritesCount: number;
-  authorId: string;
+  // authorId: string;
   user?: UserModelAttributes;
   createdAt?: Date | null;
   updatedAt?: Date | null;
@@ -71,8 +75,22 @@ interface ArticleCreationAttributes {
   title: string;
   description: string;
   body: string;
-  authorId: string;
+  // authorId: string;
   tagList?: string[];
 }
 
-export type ArticleModel = Model<ArticleModelAttributes, ArticleCreationAttributes>;
+export type ArticleModel = Model<
+  ArticleModelAttributes,
+  ArticleCreationAttributes
+>;
+
+export interface TagModelAttributes {
+  id: string;
+  name: string;
+}
+
+export interface TagCreationAttributes {
+  name: string;
+}
+
+export type TagModel = Model<TagModelAttributes, TagCreationAttributes>;

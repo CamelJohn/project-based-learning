@@ -11,9 +11,10 @@ export const $db = new Sequelize({
   dialect: "postgres",
   define: {
     timestamps: true,
+    // paranoid: true,
     freezeTableName: true,
   },
-  logging: false
+  logging: console.log,
   // sync: {
   //   force: false,
   //   alter: false,

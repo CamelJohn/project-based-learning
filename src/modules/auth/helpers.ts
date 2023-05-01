@@ -1,4 +1,5 @@
 import { Request } from "express";
+import sequelize from "sequelize";
 import { Profile, User } from "../../database/models";
 
 export async function getAuthUser(req: Request) {
@@ -25,7 +26,8 @@ export async function createUser(req: Request) {
       username: req.body.user.username,
     }
   }, {
-    include: [Profile]
+    include: [Profile],
+    returning: true,
   });
 
   return domainUser.toJSON();

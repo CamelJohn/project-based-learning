@@ -1,11 +1,27 @@
 import { NextFunction, Request, Response } from "express";
-import { Article, ArticleTag, Profile, User } from "../../database/models";
+import { Article, ArticleTag, Profile, Tag, User } from "../../database/models";
 import { createArticleRequestValidationSchema } from "./validation.schema";
 import { UnprocessableEntity, NotFound } from "http-errors";
 import { getUserFromToken } from "../user/helpers";
 import { articleDomainToContract, articlesDomainToContract } from "./helpers";
+import { ArticleModel } from "../../database/models/types";
 
 export namespace List {
+  export function mapArticles(countedArticles: {
+    rows: ArticleModel[];
+    count: number;
+  }) {
+    return {
+      articles: countedArticles.rows.map((article) =>
+        articlesDomainToContract(
+          article.toJSON(),
+          article.toJSON().user?.profile!
+        )
+      ),
+      total: countedArticles.count,
+    };
+  }
+
   export async function listArticles(
     req: Request,
     res: Response,
@@ -22,17 +38,7 @@ export namespace List {
         nest: true,
       });
 
-      const articles = countedArticles.rows.map((article) =>
-        articlesDomainToContract(
-          article.toJSON(),
-          article.toJSON().user?.profile!
-        )
-      );
-
-      res.status(200).json({
-        articles,
-        total: countedArticles.count,
-      });
+      res.status(200).json(mapArticles(countedArticles));
     } catch (error) {
       console.log(error);
       next(error);
@@ -83,6 +89,18 @@ export namespace Create {
       }
     );
 
+    if (req.body.article.tagList) {
+      const uniqueTags: string[] = [...new Set(req.body.article.tagList as string[])];
+      const tags = uniqueTags.map(t => ({ name: t }));
+      const tagsDomain = await Tag.bulkCreate(tags);
+      const domainTags = tagsDomain.map(t => ({
+        articleId: article.toJSON().id,
+        tagId: t.toJSON().id
+      }))
+
+      await ArticleTag.bulkCreate(domainTags);
+    }
+
     return article.toJSON();
   }
 
@@ -108,8 +126,19 @@ export namespace Create {
     try {
       const article = await create(req);
       const profile = await getProfile(article.authorId);
+      const articleTags = await ArticleTag.findAll({ where: {
+        articleId: article.id,
+      }});
 
-      res.status(201).json(articleDomainToContract(article, profile));
+      const tagIds = articleTags.map(at => at.toJSON().tagId);
+
+      const tags = await Tag.findAll({ where: {
+        id: tagIds
+      }});
+
+      const tagList = tags.map(t => t.toJSON().name);
+
+      res.status(201).json(articleDomainToContract(article, profile, tagList));
     } catch (error) {
       console.log({ error });
       next(error);

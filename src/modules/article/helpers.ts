@@ -8,7 +8,8 @@ import {
 // TODO: get favorited
 export function articleDomainToContract(
   article: ArticleModelAttributes,
-  profile: ProfileModelAttributes
+  profile: ProfileModelAttributes,
+  tagList: string[]
 ) {
   return {
     article: {
@@ -16,7 +17,7 @@ export function articleDomainToContract(
       title: article.title,
       description: article.description,
       body: article.body,
-      tagList: [],
+      tagList,
       createdAt: article.createdAt,
       updatedAt: article.updatedAt,
       favorited: article.favorited,

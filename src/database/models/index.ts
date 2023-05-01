@@ -2,7 +2,13 @@ import { DataTypes } from "sequelize";
 import { $db } from "../instance";
 import { hash as h4shP4ssw0rd, genSalt as g3nS4lt } from "bcrypt";
 import JwT from "jsonwebtoken";
-import { ArticleModel, FollowingProfileModel, ProfileModel, UserModel } from "./types";
+import {
+  ArticleModel,
+  FollowingProfileModel,
+  ProfileModel,
+  TagModel,
+  UserModel,
+} from "./types";
 import { getConfig } from "../../utils/dotenv";
 
 const { token } = getConfig();
@@ -34,25 +40,25 @@ export const User = $db.define<UserModel>(
     hooks: {
       beforeValidate: async (user, options) => {
         // if (user.getDataValue("password")) {
-          const salt = await g3nS4lt(12);
-          const password = await h4shP4ssw0rd(
-            user.getDataValue("password"),
-            salt
-          );
-          user.setDataValue("password", password);
+        const salt = await g3nS4lt(12);
+        const password = await h4shP4ssw0rd(
+          user.getDataValue("password"),
+          salt
+        );
+        user.setDataValue("password", password);
         // }
 
         // if (user.getDataValue("token")) {
-          const authToken = JwT.sign(
-            { email: user.getDataValue("email") },
-            token.secret,
-            {
-              encoding: "utf8",
-              expiresIn: 1000 * 3 * 24 * 60 * 60,
-            }
-          );
+        const authToken = JwT.sign(
+          { email: user.getDataValue("email") },
+          token.secret,
+          {
+            encoding: "utf8",
+            expiresIn: 1000 * 3 * 24 * 60 * 60,
+          }
+        );
 
-          user.setDataValue("token", authToken);
+        user.setDataValue("token", authToken);
         // }
       },
     },
@@ -80,11 +86,7 @@ export const Profile = $db.define<ProfileModel>("profile", {
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: null,
-  },
-  userId: {
-    allowNull: false,
-    type: DataTypes.UUID,
-  },
+  }
 });
 
 export const FollowingProfile = $db.define<FollowingProfileModel>(
@@ -96,84 +98,88 @@ export const FollowingProfile = $db.define<FollowingProfileModel>(
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
     },
-    userId: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      references: {
-        model: User,
-        key: "id",
-      },
-    },
-    profileUserId: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      references: {
-        model: User,
-        key: "id",
-      },
-    },
-  },
-  {
-    indexes: [
-      {
-        fields: ["userId", "profileUserId"],
-        unique: true,
-      },
-    ],
+    // userId: {
+    //   type: DataTypes.UUID,
+    //   defaultValue: DataTypes.UUIDV4,
+    //   references: {
+    //     model: User,
+    //     key: "id",
+    //   },
+    // },
+    // profileUserId: {
+    //   type: DataTypes.UUID,
+    //   defaultValue: DataTypes.UUIDV4,
+    //   references: {
+    //     model: User,
+    //     key: "id",
+    //   },
+    // },
   }
+  // {
+  //   indexes: [
+  //     {
+  //       fields: ["userId", "profileUserId"],
+  //       unique: true,
+  //     },
+  //   ],
+  // }
 );
 
-export const Article = $db.define<ArticleModel>("article", {
-  id: {
-    primaryKey: true,
-    allowNull: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-  },
-  slug: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  description: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  body: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  favorited: {
-    type: DataTypes.BOOLEAN,
-    allowNull: true,
-    defaultValue: false,
-  },
-  favoritesCount: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    defaultValue: 0,
-  },
-  authorId: {
-    allowNull: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    references: {
-      model: User,
-      key: "id",
+export const Article = $db.define<ArticleModel>(
+  "article",
+  {
+    id: {
+      primaryKey: true,
+      allowNull: true,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
     },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    body: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    favorited: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    },
+    favoritesCount: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+    },
+    // authorId: {
+    //   allowNull: true,
+    //   type: DataTypes.UUID,
+    //   defaultValue: DataTypes.UUIDV4,
+    //   references: {
+    //     model: User,
+    //     key: "id",
+    //   },
+    // },
   },
-}, {
-  hooks: {
-    beforeValidate: async (article, options) => {
-      const title = article.getDataValue('title');
-      const slug = title.replace(/\s/gi, "-").toLowerCase();
-      article.setDataValue('slug',slug);
-    }
+  {
+    hooks: {
+      beforeValidate: async (article, options) => {
+        const title = article.getDataValue("title");
+        const slug = title.replace(/\s/gi, "-").toLowerCase();
+        article.setDataValue("slug", slug);
+      },
+    },
   }
-});
+);
 
 export const FavoriteArticle = $db.define("favoriteArticle", {
   id: {
@@ -182,24 +188,24 @@ export const FavoriteArticle = $db.define("favoriteArticle", {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
   },
-  userId: {
-    allowNull: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    references: {
-      model: User,
-      key: "id",
-    },
-  },
-  articleId: {
-    allowNull: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    references: {
-      model: Article,
-      key: "id",
-    },
-  },
+  // userId: {
+  //   allowNull: true,
+  //   type: DataTypes.UUID,
+  //   defaultValue: DataTypes.UUIDV4,
+  //   references: {
+  //     model: User,
+  //     key: "id",
+  //   },
+  // },
+  // articleId: {
+  //   allowNull: true,
+  //   type: DataTypes.UUID,
+  //   defaultValue: DataTypes.UUIDV4,
+  //   references: {
+  //     model: Article,
+  //     key: "id",
+  //   },
+  // },
 });
 
 export const Comment = $db.define("comment", {
@@ -213,27 +219,27 @@ export const Comment = $db.define("comment", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  authorId: {
-    allowNull: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    references: {
-      model: User,
-      key: "id",
-    },
-  },
-  articleId: {
-    allowNull: true,
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    references: {
-      model: Article,
-      key: "id",
-    },
-  },
+  // authorId: {
+  //   allowNull: true,
+  //   type: DataTypes.UUID,
+  //   defaultValue: DataTypes.UUIDV4,
+  //   references: {
+  //     model: User,
+  //     key: "id",
+  //   },
+  // },
+  // articleId: {
+  //   allowNull: true,
+  //   type: DataTypes.UUID,
+  //   defaultValue: DataTypes.UUIDV4,
+  //   references: {
+  //     model: Article,
+  //     key: "id",
+  //   },
+  // },
 });
 
-export const Tag = $db.define("tag", {
+export const Tag = $db.define<TagModel>("tag", {
   id: {
     primaryKey: true,
     allowNull: true,
@@ -256,33 +262,33 @@ export const ArticleTag = $db.define(
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
     },
-    articleId: {
-      allowNull: true,
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      references: {
-        model: Article,
-        key: "id",
-      },
-    },
-    tagId: {
-      allowNull: true,
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      references: {
-        model: Tag,
-        key: "id",
-      },
-    },
-  },
-  {
-    indexes: [
-      {
-        unique: true,
-        fields: ["articleId", "tagId"],
-      },
-    ],
+    // articleId: {
+    //   allowNull: true,
+    //   type: DataTypes.UUID,
+    //   defaultValue: DataTypes.UUIDV4,
+    //   references: {
+    //     model: Article,
+    //     key: "id",
+    //   },
+    // },
+    // tagId: {
+    //   allowNull: true,
+    //   type: DataTypes.UUID,
+    //   defaultValue: DataTypes.UUIDV4,
+    //   references: {
+    //     model: Tag,
+    //     key: "id",
+    //   },
+    // },
   }
+  // {
+  //   indexes: [
+  //     {
+  //       unique: true,
+  //       fields: ["articleId", "tagId"],
+  //     },
+  //   ],
+  // }
 );
 
 export function $definitions() {
@@ -292,6 +298,11 @@ export function $definitions() {
     onUpdate: "CASCADE",
     foreignKey: "userId",
   });
+  Profile.hasMany(User, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    foreignKey: "profileId",
+  });
 
   // User 1:n => Article
   User.hasMany(Article, {
@@ -299,34 +310,54 @@ export function $definitions() {
     onUpdate: "CASCADE",
     foreignKey: "authorId",
   });
-
   Article.belongsTo(User, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
     foreignKey: "authorId",
-  })
+  });
 
-  // User 1:n => Article
-  User.hasMany(FavoriteArticle, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
+  User.belongsToMany(Article, {
+    through: FavoriteArticle,
     foreignKey: "userId",
   });
-  FavoriteArticle.hasMany(User, {
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-    foreignKey: "favoriteArticleId",
+  Article.belongsToMany(User, {
+    through: FavoriteArticle,
+    foreignKey: "articleId",
   });
 
-  // Article 1:m => Tag
-  ArticleTag.hasMany(Article, {
+  Tag.belongsToMany(Article, { through: ArticleTag, foreignKey: "tagId" });
+  Article.belongsToMany(Tag, { through: ArticleTag, foreignKey: "articleId" });
+
+  User.belongsToMany(User, {
+    through: FollowingProfile,
+    as: "following",
+    foreignKey: "followerId",
+  });
+  User.belongsToMany(User, {
+    through: FollowingProfile,
+    as: "followed",
+    foreignKey: "followedId",
+  });
+
+  User.hasMany(Comment, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
-    foreignKey: "tagId",
+    foreignKey: "commentId",
   });
-  ArticleTag.hasMany(Tag, {
+  Comment.belongsTo(User, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    foreignKey: "authorId",
+  });
+
+  Article.hasMany(Comment, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
     foreignKey: "articleId",
+  });
+  Comment.belongsTo(Article, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+    foreignKey: "commentId",
   });
 }

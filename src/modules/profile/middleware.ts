@@ -1,11 +1,17 @@
 import { NextFunction, Request, Response } from "express";
 import { usernameParamValidationSchema } from "./validation.schema";
-import { UnprocessableEntity, NotFound, Conflict, BadRequest } from "http-errors";
+import {
+  UnprocessableEntity,
+  NotFound,
+  Conflict,
+  BadRequest,
+} from "http-errors";
 import { getUserFromToken } from "../user/helpers";
 import { FollowingProfile, Profile } from "../../database/models";
 import { GetFollowingArguments } from "./types";
 import { profileDomainToContract } from "./helpers";
 import { UniqueConstraintError } from "sequelize";
+import { FollowingCreationAttributes } from "../../database/models/types";
 
 export namespace ProfileCommon {
   export async function validateUsernameParam(
@@ -23,13 +29,13 @@ export namespace ProfileCommon {
   }
 
   export async function getFollowing({
-    userId,
-    profileUserId,
-  }: GetFollowingArguments) {
+    followedId,
+    followerId,
+  }: FollowingCreationAttributes) {
     const following = await FollowingProfile.findOne({
       where: {
-        userId,
-        profileUserId,
+        followedId,
+        followerId,
       },
     });
 
@@ -62,12 +68,13 @@ export namespace Get {
       }
 
       const following = await ProfileCommon.getFollowing({
-        userId: user.id,
-        profileUserId: profile.id,
+        followerId: user.id,
+        followedId: profile.id,
       });
 
       res.status(200).json(profileDomainToContract(profile, following));
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
@@ -75,25 +82,25 @@ export namespace Get {
 
 export namespace Follow {
   async function followProfile({
-    userId,
-    profileUserId,
-  }: GetFollowingArguments) {
+    followedId,
+    followerId,
+  }: FollowingCreationAttributes) {
     const following = await FollowingProfile.create({
-        userId,
-        profileUserId,
+      followerId,
+      followedId,
     });
 
     return following.toJSON();
   }
 
   async function unfollowProfile({
-    userId,
-    profileUserId,
-  }: GetFollowingArguments) {
+    followedId,
+    followerId,
+  }: FollowingCreationAttributes) {
     const following = await FollowingProfile.destroy({
       where: {
-        userId,
-        profileUserId,
+        followedId,
+        followerId,
       },
     });
 
@@ -115,8 +122,8 @@ export namespace Follow {
       const user = await getUserFromToken(req);
 
       const following = await followProfile({
-        userId: user.id,
-        profileUserId: profile.userId,
+        followerId: user.id,
+        followedId: profile.userId ?? '',
       });
 
       const updatedProfile = await ProfileCommon.getProfile(
@@ -132,7 +139,7 @@ export namespace Follow {
         .json(
           profileDomainToContract(
             updatedProfile,
-            updatedProfile.userId === following.profileUserId
+            updatedProfile.userId === following.followedId
           )
         );
     } catch (error) {
@@ -161,8 +168,8 @@ export namespace Follow {
       const user = await getUserFromToken(req);
 
       const following = await unfollowProfile({
-        userId: user.id,
-        profileUserId: profile.userId,
+        followerId: user.id,
+        followedId: profile.userId ?? '',
       });
 
       const updatedProfile = await ProfileCommon.getProfile(
