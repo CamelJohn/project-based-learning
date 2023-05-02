@@ -12,3 +12,13 @@ export const createArticleRequestValidationSchema = Joi.object({
 export const slugParamValidationSchema = Joi.object({
   slug: Joi.string().required(),
 }).required();
+
+export const updateArticleRequestValidationSchema = Joi.object({
+  article: Joi.object()
+    .keys({
+      title: Joi.string(),
+      description: Joi.string(),
+      body: Joi.string(),
+    })
+    .or("title", "description", "body").min(1),
+}).required();

@@ -1,5 +1,5 @@
 import express from "express";
-import { ArticleCommon, Create, Delete, Get, List } from "./middleware";
+import { ArticleCommon, Create, Delete, Get, List, Update } from "./middleware";
 
 export const articleRouter = express.Router();
 
@@ -11,7 +11,7 @@ articleRouter.get("/:slug", ArticleCommon.validateSlug, Get.get);
 
 articleRouter.post("", Create.validateBody, Create.createArticle);
 
-articleRouter.put("/:slug");
+articleRouter.put("/:slug", Update.validateUpdateRequest, Update.updateArticle);
 
 articleRouter.delete("/:slug", ArticleCommon.validateSlug, Delete.remove);
 

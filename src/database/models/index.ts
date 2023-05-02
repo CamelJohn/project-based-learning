@@ -138,10 +138,12 @@ export const Article = $db.define<ArticleModel>(
     slug: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     title: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     description: {
       type: DataTypes.STRING,
@@ -175,9 +177,13 @@ export const Article = $db.define<ArticleModel>(
     hooks: {
       beforeValidate: async (article, options) => {
         const title = article.getDataValue("title");
+        if (!title) {
+          return;
+        }
+        
         const slug = title.replace(/\s/gi, "-").toLowerCase();
         article.setDataValue("slug", slug);
-      },
+      }
     },
   }
 );

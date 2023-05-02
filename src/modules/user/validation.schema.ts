@@ -9,5 +9,5 @@ export const updateRequestValidationSchema = Joi.object({
       image: Joi.string().allow(null),
       bio: Joi.string().allow(null),
     })
-    .or("email", "username", "password", "image", "bio"),
+    .or("email", "username", "password", "image", "bio").min(1),
 }).required();

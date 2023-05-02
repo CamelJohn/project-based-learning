@@ -3,6 +3,7 @@ import { Article, ArticleTag, Profile, Tag, User } from "../../database/models";
 import {
   createArticleRequestValidationSchema,
   slugParamValidationSchema,
+  updateArticleRequestValidationSchema,
 } from "./validation.schema";
 import { UnprocessableEntity, NotFound, Conflict } from "http-errors";
 import { getUserFromToken } from "../user/helpers";
@@ -202,19 +203,88 @@ export namespace Delete {
 
 export namespace Get {
   export async function get(req: Request, res: Response, next: NextFunction) {
-      try {
-        const article = await Article.findOne({ 
-          where: { slug: req.params.slug },
-          include: [{ model: User, include: [Profile]}]
-        })
+    try {
+      const article = await Article.findOne({
+        where: { slug: req.params.slug },
+        include: [{ model: User, include: [Profile] }],
+      });
 
-        if (!article) {
-          return next(new NotFound('article does not exist'));
-        }
-
-        res.status(200).send(articleDomainToContract(article.toJSON()))
-      } catch (error) {
-        next(error);
+      if (!article) {
+        return next(new NotFound("article does not exist"));
       }
+
+      res.status(200).send(articleDomainToContract(article.toJSON()));
+    } catch (error) {
+      next(error);
     }
+  }
+}
+
+export namespace Update {
+  function slugify(title: string) {
+    if (title?.trim().length === 0) {
+      return undefined;
+    }
+    return title?.replace(/\s/gi, "-")?.toLowerCase();
+  }
+
+  export async function validateUpdateRequest(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const isValid = updateArticleRequestValidationSchema.validate(req.body);
+
+    if (isValid.error) {
+      return next(new UnprocessableEntity(isValid.error.message));
+    }
+
+    next();
+  }
+  export async function updateArticle(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const rawTags = await Article.findOne({
+        where: {
+          slug: req.params.slug,
+        },
+        include: [Tag],
+      });
+
+      const [, [rawArticle]] = await Article.update(
+        {
+          title: req.body.article.title,
+          description: req.body.article.description,
+          body: req.body.article.body,
+          slug: req.body.article.title ? slugify(req.body.article.title) : void 0,
+        },
+        {
+          where: {
+            slug: req.params.slug,
+          },
+          returning: true,
+        }
+      );
+
+      const article = rawArticle.toJSON();
+
+      const rawUser = await User.findOne({
+        where: {
+          id: article.authorId,
+        },
+        include: [Profile],
+      });
+
+      const profile = rawUser?.toJSON().profile;
+      const tags = rawTags?.toJSON().tags?.map((t) => t.name);
+
+      res.status(200).json(articleDomainToContract(article, tags, profile));
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
 }
