@@ -163,7 +163,7 @@ export namespace Create {
 
       const tagList = tags.map((t) => t.toJSON().name);
 
-      res.status(201).json(articleDomainToContract(article, profile, tagList));
+      res.status(201).json(articleDomainToContract(article, tagList, profile));
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
         return next(
@@ -198,4 +198,23 @@ export namespace Delete {
       next(error);
     }
   }
+}
+
+export namespace Get {
+  export async function get(req: Request, res: Response, next: NextFunction) {
+      try {
+        const article = await Article.findOne({ 
+          where: { slug: req.params.slug },
+          include: [{ model: User, include: [Profile]}]
+        })
+
+        if (!article) {
+          return next(new NotFound('article does not exist'));
+        }
+
+        res.status(200).send(articleDomainToContract(article.toJSON()))
+      } catch (error) {
+        next(error);
+      }
+    }
 }
