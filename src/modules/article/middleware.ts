@@ -1,11 +1,30 @@
 import { NextFunction, Request, Response } from "express";
 import { Article, ArticleTag, Profile, Tag, User } from "../../database/models";
-import { createArticleRequestValidationSchema } from "./validation.schema";
+import {
+  createArticleRequestValidationSchema,
+  slugParamValidationSchema,
+} from "./validation.schema";
 import { UnprocessableEntity, NotFound, Conflict } from "http-errors";
 import { getUserFromToken } from "../user/helpers";
 import { articleDomainToContract, articlesDomainToContract } from "./helpers";
 import { ArticleModel } from "../../database/models/types";
-import { UniqueConstraintError, ValidationErrorItem } from "sequelize";
+import { UniqueConstraintError } from "sequelize";
+
+export namespace ArticleCommon {
+  export async function validateSlug(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const isValid = slugParamValidationSchema.validate(req.params);
+
+    if (isValid.error) {
+      return next(new UnprocessableEntity(isValid.error.message));
+    }
+
+    next();
+  }
+}
 
 export namespace List {
   export function mapArticles(countedArticles: {
@@ -14,10 +33,7 @@ export namespace List {
   }) {
     return {
       articles: countedArticles.rows.map((article) =>
-        articlesDomainToContract(
-          article.toJSON(),
-          article.toJSON().user?.profile!
-        )
+        articlesDomainToContract(article.toJSON())
       ),
       total: countedArticles.count,
     };
@@ -29,19 +45,19 @@ export namespace List {
     next: NextFunction
   ) {
     try {
-      const countedArticles = await Article.findAndCountAll({
+      const articles = await Article.findAndCountAll({
         include: [
           {
             model: User,
             include: [{ model: Profile }],
           },
+          { model: Tag },
         ],
         nest: true,
       });
 
-      res.status(200).json(mapArticles(countedArticles));
+      res.status(200).json(mapArticles(articles));
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }
@@ -69,6 +85,7 @@ export namespace Create {
         title: req.body.article.title,
         description: req.body.article.description,
         body: req.body.article.body,
+        authorId: user.id,
       },
       {
         include: [
@@ -106,10 +123,10 @@ export namespace Create {
     return article.toJSON();
   }
 
-  export async function getProfile(userId: string) {
+  export async function getProfile(userId: string | undefined) {
     const profile = await Profile.findOne({
       where: {
-        userId,
+        userId: userId,
       },
     });
 
@@ -127,14 +144,16 @@ export namespace Create {
   ) {
     try {
       const article = await create(req);
-      const profile = await getProfile(article.user?.id ?? "");
+      const profile = await getProfile(article.authorId);
       const articleTags = await ArticleTag.findAll({
         where: {
           articleId: article.id,
         },
       });
 
-      const tagIds = articleTags.map((at) => at.toJSON().tagId);
+      const tagIds = [
+        ...new Set(articleTags.map((at) => at.toJSON().tagId ?? "")),
+      ];
 
       const tags = await Tag.findAll({
         where: {
@@ -155,6 +174,27 @@ export namespace Create {
           )
         );
       }
+
+      console.log({ error });
+      next(error);
+    }
+  }
+}
+
+export namespace Delete {
+  export async function remove(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      await Article.destroy({
+        where: {
+          slug: req.params.slug,
+        },
+      });
+      res.status(204).send();
+    } catch (error) {
       next(error);
     }
   }

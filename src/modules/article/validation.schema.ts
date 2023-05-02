@@ -8,3 +8,7 @@ export const createArticleRequestValidationSchema = Joi.object({
     tagList: Joi.array().allow(Joi.string()).optional(),
   }).required(),
 }).required();
+
+export const slugParamValidationSchema = Joi.object({
+  slug: Joi.string().required(),
+}).required();

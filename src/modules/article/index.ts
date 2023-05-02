@@ -1,20 +1,19 @@
 import express from "express";
-import { Create, List } from "./middleware";
+import { ArticleCommon, Create, Delete, List } from "./middleware";
 
 export const articleRouter = express.Router();
 
-// TODO: to be continuted
 articleRouter.get("", List.listArticles);
 
 articleRouter.get("/feed");
 
-articleRouter.get("/:slug");
+articleRouter.get("/:slug", ArticleCommon.validateSlug);
 
 articleRouter.post("", Create.validateBody, Create.createArticle);
 
 articleRouter.put("/:slug");
 
-articleRouter.delete("/:slug");
+articleRouter.delete("/:slug", ArticleCommon.validateSlug, Delete.remove);
 
 articleRouter.post('/:slug/comment')
 

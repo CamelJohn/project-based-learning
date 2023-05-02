@@ -9,7 +9,7 @@ import {
 export function articleDomainToContract(
   article: ArticleModelAttributes,
   profile: ProfileModelAttributes,
-  tagList: string[]
+  tags: string[]
 ) {
   return {
     article: {
@@ -17,7 +17,7 @@ export function articleDomainToContract(
       title: article.title,
       description: article.description,
       body: article.body,
-      tagList,
+      tags,
       createdAt: article.createdAt,
       updatedAt: article.updatedAt,
       favorited: article.favorited,
@@ -32,24 +32,21 @@ export function articleDomainToContract(
   };
 }
 
-export function articlesDomainToContract(
-  article: ArticleModelAttributes,
-  profile: ProfileModelAttributes
-) {
+export function articlesDomainToContract(article: ArticleModelAttributes) {
   return {
     slug: article.slug,
     title: article.title,
     description: article.description,
     body: article.body,
-    tagList: [],
+    tagList: article.tags?.map(t => t.name) || [],
     createdAt: article.createdAt,
     updatedAt: article.updatedAt,
     favorited: article.favorited,
     favoritesCount: article.favoritesCount,
     author: {
-      username: profile.username,
-      bio: profile.bio,
-      image: profile.image,
+      username: article.user?.profile?.username,
+      bio: article.user?.profile?.bio,
+      image: article.user?.profile?.image,
       following: false,
     },
   };

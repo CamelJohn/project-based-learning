@@ -30,12 +30,12 @@ export async function Server({ test = false }: ServerArgs) {
 
     if (test) {
       return webServer.listen(server.test_port, (): void =>
-        console.log(server.test_message)
+        console.info(server.test_message)
       );
     }
 
     return webServer.listen(server.port, (): void =>
-      console.log(server.message)
+      console.info(server.message)
     );
   } catch (error) {
     console.error({ error, context: "server" });

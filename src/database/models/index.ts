@@ -4,6 +4,7 @@ import { hash as h4shP4ssw0rd, genSalt as g3nS4lt } from "bcrypt";
 import JwT from "jsonwebtoken";
 import {
   ArticleModel,
+  ArticleTagModel,
   FollowingProfileModel,
   ProfileModel,
   TagModel,
@@ -86,7 +87,7 @@ export const Profile = $db.define<ProfileModel>("profile", {
     type: DataTypes.STRING,
     allowNull: true,
     defaultValue: null,
-  }
+  },
 });
 
 export const FollowingProfile = $db.define<FollowingProfileModel>(
@@ -253,7 +254,7 @@ export const Tag = $db.define<TagModel>("tag", {
   },
 });
 
-export const ArticleTag = $db.define(
+export const ArticleTag = $db.define<ArticleTagModel>(
   "articleTag",
   {
     id: {
@@ -319,24 +320,42 @@ export function $definitions() {
   User.belongsToMany(Article, {
     through: FavoriteArticle,
     foreignKey: "userId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
   Article.belongsToMany(User, {
     through: FavoriteArticle,
     foreignKey: "articleId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
 
-  Tag.belongsToMany(Article, { through: ArticleTag, foreignKey: "tagId" });
-  Article.belongsToMany(Tag, { through: ArticleTag, foreignKey: "articleId" });
+  Tag.belongsToMany(Article, {
+    through: ArticleTag,
+    foreignKey: "tagId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+  Article.belongsToMany(Tag, {
+    through: ArticleTag,
+    foreignKey: "articleId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
 
   User.belongsToMany(User, {
     through: FollowingProfile,
     as: "following",
     foreignKey: "followerId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
   User.belongsToMany(User, {
     through: FollowingProfile,
     as: "followed",
     foreignKey: "followedId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
 
   User.hasMany(Comment, {
